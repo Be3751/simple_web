@@ -15,6 +15,7 @@ func main() {
 	mux.POST("/process", handlers.Process)               // 画像の送信先
 	mux.GET("/status501", handlers.Status501)            // ステータスコード501とメッセージを返す
 	mux.GET("/redirect_google", handlers.RedirectGoogle) // ステータスコード302でGoogleにリダイレクト
+	mux.GET("/json", handlers.ResonseJson)               // JSONデータをレスポンス
 
 	server := http.Server{
 		Addr:    "127.0.0.1:8080",
