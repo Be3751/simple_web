@@ -91,3 +91,14 @@ func SetCookie(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 	http.SetCookie(w, &c1)
 	http.SetCookie(w, &c2)
 }
+
+func GetCookie(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+	// 本来であればクッキーの解析を自前で行う必要があるが，Go言語に用意されている
+	c1, err := req.Cookie("first_cookie") // キーの値で一意に取得する方法
+	if err != nil {
+		fmt.Fprintln(w, "Cannot get the cookie.")
+	}
+	cs := req.Cookies() // 全ての組を取得する方法
+	fmt.Fprintln(w, c1)
+	fmt.Fprintln(w, cs)
+}
