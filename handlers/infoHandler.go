@@ -74,3 +74,20 @@ func ResonseJson(w http.ResponseWriter, req *http.Request, p httprouter.Params) 
 	json, _ := json.Marshal(post) // json.Marshalで構造体をJSON形式にエンコード
 	w.Write(json)                 // メッセージに書き込み
 }
+
+func SetCookie(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+	// Cookie構造体を定義
+	c1 := http.Cookie{
+		Name:     "first_cookie",
+		Value:    "Piyo is sleeping",
+		HttpOnly: true,
+	}
+	c2 := http.Cookie{
+		Name:     "second_cookie",
+		Value:    "Masa is eating",
+		HttpOnly: true,
+	}
+	// ヘッダにシリアル化したクッキーを設定
+	http.SetCookie(w, &c1)
+	http.SetCookie(w, &c2)
+}
