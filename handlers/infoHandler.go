@@ -48,6 +48,11 @@ func Process(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 }
 
 func Status501(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
-	w.WriteHeader(501)
+	w.WriteHeader(501) // ステータスコードを501に設定
 	fmt.Fprintf(w, "No such a service.")
+}
+
+func RedirectGoogle(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+	w.Header().Set("Location", "http://google.com") // レスポンスヘッダにLocation: http://google.comを設定
+	w.WriteHeader(302)                              // ステータスコードを302に設定
 }
