@@ -46,3 +46,8 @@ func Process(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 		}
 	}
 }
+
+func Status501(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+	w.WriteHeader(501)
+	fmt.Fprintf(w, "No such a service.")
+}
