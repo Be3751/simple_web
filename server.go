@@ -18,6 +18,8 @@ func main() {
 	mux.GET("/json", handlers.ResonseJson)               // JSONデータをレスポンス
 	mux.GET("/set_cookie", handlers.SetCookie)           // クライアントにクッキーを保存
 	mux.GET("/get_cookie", handlers.GetCookie)           // クライアントからクッキーを取得
+	mux.GET("/set_message", handlers.SetMessage)         // クッキーにメッセージを設定
+	mux.GET("/show_message", handlers.ShowMessage)       // クッキで設定したメッセージをフラッシュメッセージとして表示
 
 	server := http.Server{
 		Addr:    "127.0.0.1:8080",

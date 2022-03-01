@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -75,6 +77,8 @@ func ResonseJson(w http.ResponseWriter, req *http.Request, p httprouter.Params) 
 	w.Write(json)                 // メッセージに書き込み
 }
 
+// セッションクッキーはブラウザを終了すると破棄される．
+// タブやウィンドウを閉じるだけでは破棄されない．
 func SetCookie(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 	// Cookie構造体を定義
 	c1 := http.Cookie{
@@ -101,4 +105,34 @@ func GetCookie(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
 	cs := req.Cookies() // 全ての組を取得する方法
 	fmt.Fprintln(w, c1)
 	fmt.Fprintln(w, cs)
+}
+
+// フラッシュメッセージにしようするメッセージをクッキーに設定
+func SetMessage(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+	msg := []byte("Hello World!")
+	c := http.Cookie{
+		Name:  "flash",
+		Value: base64.URLEncoding.EncodeToString(msg), // メッセージに特殊文字が含まれる可能性を考慮して，通常URLエンコードする必要がある
+	}
+	http.SetCookie(w, &c)
+}
+
+// フラッシュメッセージ
+func ShowMessage(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+	c, err := req.Cookie("flash") // クッキーからflashがキーとなる値を取得
+	if err != nil {
+		if err == http.ErrNoCookie {
+			fmt.Fprintln(w, "No message.")
+		}
+	} else {
+		// 同じ名前のクッキーに過去を表す値を指定することで，実質的に破棄している
+		rc := http.Cookie{
+			Name:    "flash",
+			MaxAge:  -1,
+			Expires: time.Unix(1, 0),
+		}
+		http.SetCookie(w, &rc)
+		val, _ := base64.URLEncoding.DecodeString(c.Value) // クッキーflashを破棄する前に取得したメッセージをデコード
+		fmt.Fprintln(w, string(val))
+	}
 }
