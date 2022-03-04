@@ -4,8 +4,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"os"
 	"time"
@@ -134,5 +136,35 @@ func ShowMessage(w http.ResponseWriter, req *http.Request, p httprouter.Params) 
 		http.SetCookie(w, &rc)
 		val, _ := base64.URLEncoding.DecodeString(c.Value) // クッキーflashを破棄する前に取得したメッセージをデコード
 		fmt.Fprintln(w, string(val))
+		fmt.Fprintln(w, "hello")
 	}
+}
+
+func ShowInfo(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+	t, _ := template.ParseFiles("templates/info.html")
+	t.Execute(w, "Hello")
+}
+
+func formatDate(t time.Time) string {
+	layout := "2006-01-02"
+	return t.Format(layout)
+}
+
+// テンプレートエンジンの起動
+func ProcessTemplate(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+	funcMap := template.FuncMap{"fdate": formatDate}
+	t := template.New("templates/practice.html").Funcs(funcMap)
+	t, _ = t.ParseFiles("templates/practice.html")
+	t.Execute(w, time.Now())
+}
+
+func Layout(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+	rand.Seed(time.Now().Unix())
+	var t *template.Template
+	if rand.Intn(10) > 5 {
+		t, _ = template.ParseFiles("templates/layout.html", "templates/red_hello.html")
+	} else {
+		t, _ = template.ParseFiles("templates/layout.html")
+	}
+	t.ExecuteTemplate(w, "layout", "")
 }
