@@ -16,7 +16,13 @@ func main() {
 	mux.GET("/status501", handlers.Status501)            // ステータスコード501とメッセージを返す
 	mux.GET("/redirect_google", handlers.RedirectGoogle) // ステータスコード302でGoogleにリダイレクト
 	mux.GET("/json", handlers.ResonseJson)               // JSONデータをレスポンス
-	mux.GET("/cookie", handlers.SetCookie)               // クライアントにクッキーを保存
+	mux.GET("/set_cookie", handlers.SetCookie)           // クライアントにクッキーを保存
+	mux.GET("/get_cookie", handlers.GetCookie)           // クライアントからクッキーを取得
+	mux.GET("/set_message", handlers.SetMessage)         // クッキーにメッセージを設定
+	mux.GET("/show_message", handlers.ShowMessage)       // クッキで設定したメッセージをフラッシュメッセージとして表示
+	mux.GET("/info", handlers.ShowInfo)
+	mux.GET("/practice", handlers.ProcessTemplate)
+	mux.GET("/layout", handlers.Layout)
 
 	server := http.Server{
 		Addr:    "127.0.0.1:8080",
