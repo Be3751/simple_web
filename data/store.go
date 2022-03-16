@@ -2,16 +2,27 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	_ "github.com/lib/pq"
 )
 
+// 投稿とコメントで1対多の関係になるようフィールドにポインタを追加
 // 投稿のための構造体
 type Post struct {
+	Id       int
+	Content  string
+	Author   string
+	Comments []Comment
+}
+
+// コメントのための構造体
+type Comment struct {
 	Id      int
 	Content string
 	Author  string
+	Post    *Post
 }
 
 var Db *sql.DB // 構造体sql.DBの宣言
@@ -44,7 +55,22 @@ func Posts(limit int) (posts []Post, err error) {
 
 func GetPost(id int) (post Post, err error) {
 	post = Post{}
+	post.Comments = []Comment{}
 	err = Db.QueryRow("select id, content, author from posts where id = $1", id).Scan(&post.Id, &post.Content, &post.Author)
+	rows, err := Db.Query("select id, content, author from comments where post_id = $1", id) // 外部キーpost_idに一致するコメントを複数取得（1対多の関係）
+	if err != nil {
+		return
+	}
+	// 取得したコメントを投稿内のコメントスライスに追加していく
+	for rows.Next() {
+		comment := Comment{Post: &post}
+		err = rows.Scan(&comment.Id, &comment.Content, &comment.Author)
+		if err != nil {
+			return
+		}
+		post.Comments = append(post.Comments, comment)
+	}
+	rows.Close()
 	return
 }
 
@@ -66,6 +92,16 @@ func (post *Post) Update() (err error) {
 
 func (post *Post) Delete() (err error) {
 	_, err = Db.Exec("delete from posts where id = $1", post.Id)
+	return
+}
+
+func (comment *Comment) Create() (err error) {
+	// コメントをDBに保存する前に投稿が存在していることを確認する
+	if comment.Post == nil {
+		err = errors.New("Post not found")
+		return
+	}
+	err = Db.QueryRow("insert into comments (content, author, post_id) values ($1, $2, $3) returning id", comment.Content, comment.Author, comment.Post.Id).Scan(&comment.Id)
 	return
 }
 
